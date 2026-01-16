@@ -36,3 +36,31 @@ int bond_decode_varint32(const uint8_t *input, uint32_t *value)
     }
     return 0; // Error: varint32 too long
 }
+
+// ZigZag encode: signed → unsigned
+// Maps small negative numbers to small positive numbers
+uint32_t bond_zigzag_encode32(int32_t value)
+{
+    /*Algo :
+        ZigZag encoding maps signed integers to unsigned integers
+        so that numbers with a small absolute value (for instance, -1)
+        have a small varint encoded value too.
+       
+        Intuitively, it works by mapping negative values to odd numbers
+        and positive values to even numbers.
+        Multiply the positive values by 2. make every positive value to even. 
+        and hence the odd are reserved for negative values. multiply the negative values by 2 and subtract 1 to make them odd.
+
+        for bit manipulation:
+        (value << 1) : multiply by 2
+        (value >> 31) : if value is negative, this results in all bits being 1 (i.e., -1 in two's complement), otherwise all bits are 0.
+    */
+
+    return (value << 1) ^ (value >> 31);
+}
+
+// ZigZag decode: unsigned → signed
+int32_t bond_zigzag_decode32(uint32_t value)
+{
+    return value >> 1 ^ -(int32_t)(value & 1);
+}
