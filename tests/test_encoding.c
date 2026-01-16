@@ -15,6 +15,10 @@ uint32_t bond_zigzag_encode32(int32_t value);
 int32_t bond_zigzag_decode32(uint32_t value);
 uint64_t bond_zigzag_encode64(int64_t value);
 int64_t bond_zigzag_decode64(uint64_t value);
+size_t bond_encode_float(float value, uint8_t *buffer);
+float bond_decode_float(const uint8_t *buffer);
+size_t bond_encode_double(double value, uint8_t *buffer);
+double bond_decode_double(const uint8_t *buffer);
 
 void setUp(void) {}
 void tearDown(void) {}
@@ -193,6 +197,37 @@ void test_zigzag64_roundtrip(void)
     }
 }
 
+// ============ Float/Double Tests ============
+
+void test_float_roundtrip(void)
+{
+    float test_values[] = {0.0f, 1.0f, -1.0f, 0.5f, 3.14159f, -273.15f, 1e10f, 1e-10f};
+    
+    for (int i = 0; i < 8; i++) {
+        uint8_t buf[4];
+        size_t len = bond_encode_float(test_values[i], buf);
+        float decoded = bond_decode_float(buf);
+        
+        TEST_ASSERT_EQUAL(4, len);  // Always 4 bytes
+        TEST_ASSERT_EQUAL_FLOAT(test_values[i], decoded);
+    }
+}
+
+void test_double_roundtrip(void)
+{
+    double test_values[] = {0.0, 1.0, -1.0, 0.5, 3.141592653589793, -273.15, 1e100, 1e-100};
+    
+    for (int i = 0; i < 8; i++) {
+        uint8_t buf[8];
+        size_t len = bond_encode_double(test_values[i], buf);
+        double decoded = bond_decode_double(buf);
+        
+        TEST_ASSERT_EQUAL(8, len);  // Always 8 bytes
+        // Compare raw bytes since Unity double support is disabled
+        TEST_ASSERT_EQUAL_MEMORY(&test_values[i], &decoded, sizeof(double));
+    }
+}
+
 // ============ Test Runner ============
 
 int main(void)
@@ -214,6 +249,8 @@ int main(void)
     RUN_TEST(test_varint64_roundtrip);
     RUN_TEST(test_zigzag16_roundtrip);
     RUN_TEST(test_zigzag64_roundtrip);
+    RUN_TEST(test_float_roundtrip);
+    RUN_TEST(test_double_roundtrip);
     
     return UNITY_END();
 }

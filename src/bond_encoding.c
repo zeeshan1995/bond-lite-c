@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 
 // Write a varint-encoded uint32 to a byte array
 // Returns: number of bytes written
@@ -153,4 +154,56 @@ int bond_decode_varint64(const uint8_t *input, uint64_t *value)
         shift += 7;
     }
     return 0; // Error: varint64 too long
+}
+
+// ============ Float / Double ============
+/*
+ * Why no special encoding for float/double?
+ * 
+ * Unlike integers, floating-point numbers (IEEE 754) don't benefit from
+ * variable-length encoding:
+ * 
+ * 1. Every bit matters: The 32/64 bits encode sign, exponent, and mantissa.
+ *    There are no "leading zeros" to compress like in integers.
+ * 
+ * 2. Small values don't mean fewer bits:
+ *    - 0.5f    = 0x3F000000
+ *    - 1.0f    = 0x3F800000
+ *    - 0.0001f = 0x38D1B717
+ *    All require the full 32 bits regardless of magnitude.
+ * 
+ * 3. Varint would corrupt data: The 0x80 continuation bit trick would
+ *    destroy the float's binary representation.
+ * 
+ * Bond spec: "float, double - 32-bit or 64-bit little endian IEEE 764"
+ * 
+ * NOTE: Like the official Microsoft Bond implementation, we assume little-endian.
+ * The Bond C++ code (bond/stream/output_buffer.h) uses direct memcpy without
+ * byte swapping. Big-endian platforms are not officially supported by Bond.
+ */
+
+size_t bond_encode_float(float value, uint8_t *buffer)
+{
+    memcpy(buffer, &value, sizeof(float));
+    return sizeof(float);  // Always 4 bytes
+}
+
+float bond_decode_float(const uint8_t *buffer)
+{
+    float value;
+    memcpy(&value, buffer, sizeof(float));
+    return value;
+}
+
+size_t bond_encode_double(double value, uint8_t *buffer)
+{
+    memcpy(buffer, &value, sizeof(double));
+    return sizeof(double);  // Always 8 bytes
+}
+
+double bond_decode_double(const uint8_t *buffer)
+{
+    double value;
+    memcpy(&value, buffer, sizeof(double));
+    return value;
 }
