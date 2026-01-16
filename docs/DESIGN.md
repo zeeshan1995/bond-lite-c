@@ -69,7 +69,7 @@ Low-level encoding/decoding primitives.
 
 ---
 
-### 2. Buffer (`bond_buffer.c`) 🔄 IN PROGRESS
+### 2. Buffer (`bond_buffer.c`) ✅ COMPLETE
 
 Dynamic byte array for accumulating/consuming serialized data.
 
@@ -99,12 +99,11 @@ typedef struct {
 
 ### 3. Writer (`bond_writer.c`) ⬜ TODO
 
-High-level serialization API. Writes Bond CompactBinary format.
+High-level serialization API. Writes Bond CompactBinary v1 format.
 
 ```c
 typedef struct {
     bond_buffer *buffer;
-    uint16_t version;  // v1 or v2
 } bond_writer;
 ```
 
@@ -117,20 +116,19 @@ typedef struct {
 - `bond_write_container_begin(size, element_type)` — List/set/map
 
 **Key Design Decisions:**
-- Stateful (tracks nesting depth for structs)
-- Supports both v1 and v2 CompactBinary
-- Field IDs encoded with delta optimization (small IDs = 1 byte)
+- Minimal state (just buffer pointer)
+- v1 format (matches TelInstaller, v2 in backlog)
+- Absolute field IDs (id 0-5 = 1 byte, 6-255 = 2 bytes, 256+ = 3 bytes)
 
 ---
 
 ### 4. Reader (`bond_reader.c`) ⬜ TODO
 
-High-level deserialization API. Reads Bond CompactBinary format.
+High-level deserialization API. Reads Bond CompactBinary v1 format.
 
 ```c
 typedef struct {
     bond_buffer *buffer;
-    uint16_t version;
 } bond_reader;
 ```
 
@@ -149,7 +147,7 @@ typedef struct {
 
 ---
 
-### 5. Types (`bond_types.h`) ⬜ TODO
+### 5. Types (`bond_types.h`) ✅ COMPLETE
 
 Bond type definitions and constants.
 
@@ -182,16 +180,17 @@ typedef enum {
 
 ---
 
-## Wire Format (CompactBinary v2)
+## Wire Format (CompactBinary v1)
 
 ### Struct Layout
 
 ```
-┌────────┬────────┬────────┬─────────────┬─────────┐
-│ length │ field₁ │ field₂ │     ...     │ BT_STOP │
-└────────┴────────┴────────┴─────────────┴─────────┘
-   varint   
+┌────────┬────────┬─────────────┬─────────┐
+│ field₁ │ field₂ │     ...     │ BT_STOP │
+└────────┴────────┴─────────────┴─────────┘
 ```
+
+Note: v1 has no length prefix (v2 adds varint length before fields).
 
 ### Field Header Encoding
 
@@ -279,16 +278,18 @@ bond_buffer_destroy(&buf);  // No-op, doesn't free received
 ```
 bond-lite-c/
 ├── include/
-│   └── bond_lite.h          # Public API header
+│   ├── bond_lite.h          # Public API header
+│   ├── bond_buffer.h        # ✅ Buffer struct/API
+│   └── bond_types.h         # ✅ Type definitions
 ├── src/
 │   ├── bond_encoding.c      # ✅ Varint, ZigZag, Float
-│   ├── bond_buffer.c        # 🔄 Dynamic buffer
-│   ├── bond_writer.c        # ⬜ Serialization
-│   ├── bond_reader.c        # ⬜ Deserialization
+│   ├── bond_buffer.c        # ✅ Dynamic buffer
+│   ├── bond_writer.c        # ⬜ Serialization (v1)
+│   ├── bond_reader.c        # ⬜ Deserialization (v1)
 │   └── bond_types.c         # ⬜ Type utilities
 ├── tests/
 │   ├── test_encoding.c      # ✅ 17 tests
-│   ├── test_buffer.c        # ⬜ Buffer tests
+│   ├── test_buffer.c        # ✅ 15 tests
 │   ├── test_writer.c        # ⬜ Writer tests
 │   └── test_reader.c        # ⬜ Reader tests
 ├── docs/
