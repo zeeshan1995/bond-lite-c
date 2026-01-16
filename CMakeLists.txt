@@ -22,12 +22,20 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(unity)
 
-# Test executable
+# Test executable - encoding
 add_executable(test_encoding
     src/bond_encoding.c
     tests/test_encoding.c
 )
 target_link_libraries(test_encoding unity)
 
+# Test executable - buffer
+add_executable(test_buffer
+    src/bond_buffer.c
+    tests/test_buffer.c
+)
+target_link_libraries(test_buffer unity)
+
 enable_testing()
 add_test(NAME test_encoding COMMAND test_encoding)
+add_test(NAME test_buffer COMMAND test_buffer)
