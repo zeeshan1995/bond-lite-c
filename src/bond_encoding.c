@@ -65,6 +65,30 @@ int32_t bond_zigzag_decode32(uint32_t value)
     return value >> 1 ^ -(int32_t)(value & 1);
 }
 
+// ============ ZigZag16 ============
+
+uint16_t bond_zigzag_encode16(int16_t value)
+{
+    return (value << 1) ^ (value >> 15);
+}
+
+int16_t bond_zigzag_decode16(uint16_t value)
+{
+    return (value >> 1) ^ -(int16_t)(value & 1);
+}
+
+// ============ ZigZag64 ============
+
+uint64_t bond_zigzag_encode64(int64_t value)
+{
+    return (value << 1) ^ (value >> 63);
+}
+
+int64_t bond_zigzag_decode64(uint64_t value)
+{
+    return (value >> 1) ^ -(int64_t)(value & 1);
+} 
+
 // ============ Varint16 ============
 
 int bond_encode_varint16(uint8_t *output, uint16_t value)

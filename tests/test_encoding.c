@@ -9,8 +9,12 @@ int bond_encode_varint32(uint8_t *output, uint32_t value);
 int bond_decode_varint32(const uint8_t *input, uint32_t *value);
 int bond_encode_varint64(uint8_t *output, uint64_t value);
 int bond_decode_varint64(const uint8_t *input, uint64_t *value);
+uint16_t bond_zigzag_encode16(int16_t value);
+int16_t bond_zigzag_decode16(uint16_t value);
 uint32_t bond_zigzag_encode32(int32_t value);
 int32_t bond_zigzag_decode32(uint32_t value);
+uint64_t bond_zigzag_encode64(int64_t value);
+int64_t bond_zigzag_decode64(uint64_t value);
 
 void setUp(void) {}
 void tearDown(void) {}
@@ -163,6 +167,32 @@ void test_varint64_roundtrip(void)
     }
 }
 
+// ============ ZigZag16 Tests ============
+
+void test_zigzag16_roundtrip(void)
+{
+    int16_t test_values[] = {0, 1, -1, 127, -128, 32767, -32768};
+    
+    for (int i = 0; i < 7; i++) {
+        uint16_t encoded = bond_zigzag_encode16(test_values[i]);
+        int16_t decoded = bond_zigzag_decode16(encoded);
+        TEST_ASSERT_EQUAL_INT16(test_values[i], decoded);
+    }
+}
+
+// ============ ZigZag64 Tests ============
+
+void test_zigzag64_roundtrip(void)
+{
+    int64_t test_values[] = {0, 1, -1, 127, -128, 2147483647LL, -2147483648LL, 9223372036854775807LL};
+    
+    for (int i = 0; i < 8; i++) {
+        uint64_t encoded = bond_zigzag_encode64(test_values[i]);
+        int64_t decoded = bond_zigzag_decode64(encoded);
+        TEST_ASSERT_EQUAL_INT64(test_values[i], decoded);
+    }
+}
+
 // ============ Test Runner ============
 
 int main(void)
@@ -182,6 +212,8 @@ int main(void)
     RUN_TEST(test_zigzag_roundtrip);
     RUN_TEST(test_varint16_roundtrip);
     RUN_TEST(test_varint64_roundtrip);
+    RUN_TEST(test_zigzag16_roundtrip);
+    RUN_TEST(test_zigzag64_roundtrip);
     
     return UNITY_END();
 }
