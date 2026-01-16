@@ -3,8 +3,12 @@
 #include <string.h>
 
 // Declare functions
+int bond_encode_varint16(uint8_t *output, uint16_t value);
+int bond_decode_varint16(const uint8_t *input, uint16_t *value);
 int bond_encode_varint32(uint8_t *output, uint32_t value);
 int bond_decode_varint32(const uint8_t *input, uint32_t *value);
+int bond_encode_varint64(uint8_t *output, uint64_t value);
+int bond_decode_varint64(const uint8_t *input, uint64_t *value);
 uint32_t bond_zigzag_encode32(int32_t value);
 int32_t bond_zigzag_decode32(uint32_t value);
 
@@ -125,6 +129,40 @@ void test_zigzag_roundtrip(void)
     }
 }
 
+// ============ Varint16 Tests ============
+
+void test_varint16_roundtrip(void)
+{
+    uint16_t test_values[] = {0, 1, 127, 128, 255, 256, 16383, 16384, 65535};
+    
+    for (int i = 0; i < 9; i++) {
+        uint8_t buf[4];
+        uint16_t decoded;
+        int enc_len = bond_encode_varint16(buf, test_values[i]);
+        int dec_len = bond_decode_varint16(buf, &decoded);
+        
+        TEST_ASSERT_EQUAL(test_values[i], decoded);
+        TEST_ASSERT_EQUAL(enc_len, dec_len);
+    }
+}
+
+// ============ Varint64 Tests ============
+
+void test_varint64_roundtrip(void)
+{
+    uint64_t test_values[] = {0, 1, 127, 128, 0xFFFFFFFF, 0x100000000ULL, 0xFFFFFFFFFFFFFFFFULL};
+    
+    for (int i = 0; i < 7; i++) {
+        uint8_t buf[16];
+        uint64_t decoded;
+        int enc_len = bond_encode_varint64(buf, test_values[i]);
+        int dec_len = bond_decode_varint64(buf, &decoded);
+        
+        TEST_ASSERT_EQUAL_UINT64(test_values[i], decoded);
+        TEST_ASSERT_EQUAL(enc_len, dec_len);
+    }
+}
+
 // ============ Test Runner ============
 
 int main(void)
@@ -142,6 +180,8 @@ int main(void)
     RUN_TEST(test_zigzag_encode_values);
     RUN_TEST(test_zigzag_decode_values);
     RUN_TEST(test_zigzag_roundtrip);
+    RUN_TEST(test_varint16_roundtrip);
+    RUN_TEST(test_varint64_roundtrip);
     
     return UNITY_END();
 }

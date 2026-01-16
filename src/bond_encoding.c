@@ -64,3 +64,69 @@ int32_t bond_zigzag_decode32(uint32_t value)
 {
     return value >> 1 ^ -(int32_t)(value & 1);
 }
+
+// ============ Varint16 ============
+
+int bond_encode_varint16(uint8_t *output, uint16_t value)
+{
+    int count = 0;
+    while (value > 0x7F)
+    {
+        output[count++] = (uint8_t)(value | 0x80);
+        value >>= 7;
+    }
+    output[count++] = (uint8_t)value;
+    return count;
+}
+
+int bond_decode_varint16(const uint8_t *input, uint16_t *value)
+{
+    int i_byte = 0;
+    uint16_t result = 0;
+    int shift = 0;
+    while(shift <= 14)
+    {
+        uint8_t bytes = input[i_byte++];
+        result |= (bytes & 0x7F) << shift;
+        if ((bytes & 0x80) == 0)
+        {
+            *value = result;
+            return i_byte;
+        }
+        shift += 7;
+    }
+    return 0; // Error: varint16 too long
+}
+
+// ============ Varint64 ============
+
+int bond_encode_varint64(uint8_t *output, uint64_t value)
+{
+    int count = 0;
+    while (value > 0x7F)
+    {
+        output[count++] = (uint8_t)(value | 0x80);
+        value >>= 7;
+    }
+    output[count++] = (uint8_t)value;
+    return count;
+}
+
+int bond_decode_varint64(const uint8_t *input, uint64_t *value)
+{
+    int i_byte = 0;
+    uint64_t result = 0;
+    int shift = 0;
+    while(shift <= 63)
+    {
+        uint8_t bytes = input[i_byte++];
+        result |= (uint64_t)(bytes & 0x7F) << shift;
+        if ((bytes & 0x80) == 0)
+        {
+            *value = result;
+            return i_byte;
+        }
+        shift += 7;
+    }
+    return 0; // Error: varint64 too long
+}
