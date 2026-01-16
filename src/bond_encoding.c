@@ -182,7 +182,7 @@ int bond_decode_varint64(const uint8_t *input, uint64_t *value)
  * byte swapping. Big-endian platforms are not officially supported by Bond.
  */
 
-size_t bond_encode_float(float value, uint8_t *buffer)
+size_t bond_encode_float(uint8_t *buffer, float value)
 {
     memcpy(buffer, &value, sizeof(float));
     return sizeof(float);  // Always 4 bytes
@@ -195,7 +195,7 @@ float bond_decode_float(const uint8_t *buffer)
     return value;
 }
 
-size_t bond_encode_double(double value, uint8_t *buffer)
+size_t bond_encode_double(uint8_t *buffer, double value)
 {
     memcpy(buffer, &value, sizeof(double));
     return sizeof(double);  // Always 8 bytes

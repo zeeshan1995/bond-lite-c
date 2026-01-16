@@ -36,6 +36,16 @@ add_executable(test_buffer
 )
 target_link_libraries(test_buffer unity)
 
+# Test executable - writer
+add_executable(test_writer
+    src/bond_buffer.c
+    src/bond_encoding.c
+    src/bond_writer.c
+    tests/test_writer_reader.c
+)
+target_link_libraries(test_writer unity)
+
 enable_testing()
 add_test(NAME test_encoding COMMAND test_encoding)
 add_test(NAME test_buffer COMMAND test_buffer)
+add_test(NAME test_writer COMMAND test_writer)

@@ -202,12 +202,31 @@ ID ∈ [6, 255]:   2 bytes  [110][type:5] [id:8]
 ID ∈ [256,65535]: 3 bytes [111][type:5] [id:16 LE]
 ```
 
+**Escape Codes:** The top 3 bits can hold 0-7, but values 6 and 7 are escape
+codes that signal extended encoding:
+
+```
+3-bit value:  Meaning:
+-----------   --------
+  0-5         Field ID is this value (1 byte total)
+  6 (110)     Escape: actual ID (6-255) in next 1 byte (2 bytes total)
+  7 (111)     Escape: actual ID (256-65535) in next 2 bytes LE (3 bytes total)
+```
+
+**Why Raw Bytes (Not Varint)?** Headers use raw bytes for performance:
+- Parsed for every field, must be fast
+- Read 1 byte → top 3 bits tell you exactly how many more bytes to read
+- No looping to check continuation bits like varint
+- Field IDs are bounded (max 65535), no space savings from variable encoding
+
 ### Value Encoding
+
+**Varint is only used for values, not headers:**
 
 | Type | Encoding |
 |------|----------|
 | bool | 1 byte (0 or 1) |
-| int8/uint8 | 1 byte |
+| int8/uint8 | 1 byte raw |
 | int16/32/64 | ZigZag + Varint |
 | uint16/32/64 | Varint |
 | float | 4 bytes LE |

@@ -15,9 +15,9 @@ uint32_t bond_zigzag_encode32(int32_t value);
 int32_t bond_zigzag_decode32(uint32_t value);
 uint64_t bond_zigzag_encode64(int64_t value);
 int64_t bond_zigzag_decode64(uint64_t value);
-size_t bond_encode_float(float value, uint8_t *buffer);
+size_t bond_encode_float(uint8_t *buffer, float value);
 float bond_decode_float(const uint8_t *buffer);
-size_t bond_encode_double(double value, uint8_t *buffer);
+size_t bond_encode_double(uint8_t *buffer, double value);
 double bond_decode_double(const uint8_t *buffer);
 
 void setUp(void) {}
@@ -205,7 +205,7 @@ void test_float_roundtrip(void)
     
     for (int i = 0; i < 8; i++) {
         uint8_t buf[4];
-        size_t len = bond_encode_float(test_values[i], buf);
+        size_t len = bond_encode_float(buf, test_values[i]);
         float decoded = bond_decode_float(buf);
         
         TEST_ASSERT_EQUAL(4, len);  // Always 4 bytes
@@ -219,7 +219,7 @@ void test_double_roundtrip(void)
     
     for (int i = 0; i < 8; i++) {
         uint8_t buf[8];
-        size_t len = bond_encode_double(test_values[i], buf);
+        size_t len = bond_encode_double(buf, test_values[i]);
         double decoded = bond_decode_double(buf);
         
         TEST_ASSERT_EQUAL(8, len);  // Always 8 bytes
