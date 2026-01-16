@@ -271,9 +271,11 @@ void test_write_int16(void)
     bond_writer_write_int16(&writer, 0, -100);
     
     // Field ID 0, type INT16 (15): [000][01111] = 0x0F
-    // Value: -100 as uint16 = 0xFF9C → varint
-    TEST_ASSERT_GREATER_THAN(1, buffer.size);
+    // Value: -100 zigzag encoded = 199 = 0xC7, 0x01 (varint)
+    TEST_ASSERT_EQUAL(3, buffer.size);
     TEST_ASSERT_EQUAL_HEX8(0x0F, buffer.data[0]);
+    TEST_ASSERT_EQUAL_HEX8(0xC7, buffer.data[1]);
+    TEST_ASSERT_EQUAL_HEX8(0x01, buffer.data[2]);
     
     CLEANUP();
 }
@@ -285,10 +287,10 @@ void test_write_int32(void)
     bond_writer_write_int32(&writer, 0, 42);
     
     // Field ID 0, type INT32 (16): [000][10000] = 0x10
-    // Value: 42 = 0x2A (varint)
+    // Value: 42 zigzag encoded = 84 = 0x54 (single byte varint)
     TEST_ASSERT_EQUAL(2, buffer.size);
     TEST_ASSERT_EQUAL_HEX8(0x10, buffer.data[0]);
-    TEST_ASSERT_EQUAL_HEX8(0x2A, buffer.data[1]);
+    TEST_ASSERT_EQUAL_HEX8(0x54, buffer.data[1]);
     
     CLEANUP();
 }

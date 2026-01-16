@@ -45,7 +45,28 @@ add_executable(test_writer
 )
 target_link_libraries(test_writer unity)
 
+# Test executable - reader
+add_executable(test_reader
+    src/bond_buffer.c
+    src/bond_encoding.c
+    src/bond_reader.c
+    tests/test_reader.c
+)
+target_link_libraries(test_reader unity)
+
+# Test executable - roundtrip
+add_executable(test_roundtrip
+    src/bond_buffer.c
+    src/bond_encoding.c
+    src/bond_writer.c
+    src/bond_reader.c
+    tests/test_roundtrip.c
+)
+target_link_libraries(test_roundtrip unity)
+
 enable_testing()
 add_test(NAME test_encoding COMMAND test_encoding)
 add_test(NAME test_buffer COMMAND test_buffer)
 add_test(NAME test_writer COMMAND test_writer)
+add_test(NAME test_reader COMMAND test_reader)
+add_test(NAME test_roundtrip COMMAND test_roundtrip)

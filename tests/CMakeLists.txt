@@ -22,13 +22,17 @@ target_link_libraries(test_encoding bond_lite_c unity m)
 add_executable(test_writer_reader test_writer_reader.c)
 target_link_libraries(test_writer_reader bond_lite_c unity m)
 
+add_executable(test_roundtrip test_roundtrip.c)
+target_link_libraries(test_roundtrip bond_lite_c unity m)
+
 # Register tests with CTest
 add_test(NAME test_buffer COMMAND test_buffer)
 add_test(NAME test_encoding COMMAND test_encoding)
 add_test(NAME test_writer_reader COMMAND test_writer_reader)
+add_test(NAME test_roundtrip COMMAND test_roundtrip)
 
 # Set test properties
-set_tests_properties(test_buffer test_encoding test_writer_reader
+set_tests_properties(test_buffer test_encoding test_writer_reader test_roundtrip
     PROPERTIES
     TIMEOUT 30
 )

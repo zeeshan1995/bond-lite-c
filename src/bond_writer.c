@@ -255,21 +255,21 @@ void bond_writer_write_int8_value(bond_writer *writer, int8_t value)
 void bond_writer_write_int16_value(bond_writer *writer, int16_t value)
 {
     uint8_t buf[3];  // max 3 bytes for varint16
-    size_t len = bond_encode_varint16(buf, (uint16_t)value);
+    size_t len = bond_encode_varint16(buf, bond_zigzag_encode16(value));
     bond_buffer_write(writer->buffer, buf, len);
 }
 
 void bond_writer_write_int32_value(bond_writer *writer, int32_t value)
 {
     uint8_t buf[5];  // max 5 bytes for varint32
-    size_t len = bond_encode_varint32(buf, (uint32_t)value);
+    size_t len = bond_encode_varint32(buf, bond_zigzag_encode32(value));
     bond_buffer_write(writer->buffer, buf, len);
 }
 
 void bond_writer_write_int64_value(bond_writer *writer, int64_t value)
 {
     uint8_t buf[10];  // max 10 bytes for varint64
-    size_t len = bond_encode_varint64(buf, (uint64_t)value);
+    size_t len = bond_encode_varint64(buf, bond_zigzag_encode64(value));
     bond_buffer_write(writer->buffer, buf, len);
 }
 
